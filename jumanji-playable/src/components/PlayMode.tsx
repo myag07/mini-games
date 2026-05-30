@@ -3,6 +3,8 @@ import type { GameConfig, Player } from "../types";
 import { JUMANJI_CARDS, PLAYER_PRESETS } from "../data/gameLogic";
 import IsometricBoard from "./IsometricBoard";
 import GridBoard from "./GridBoard";
+import GridBoardEnhanced from "./GridBoardEnhanced";
+import JumanjiCard from "./JumanjiCard";
 
 interface Props {
   game: GameConfig;
@@ -31,6 +33,8 @@ export default function PlayMode({ game }: Props) {
   const [log, setLog] = useState<string[]>(["🎲 Macera başladı! İyi şanslar."]);
   const [winner, setWinner] = useState<Player | null>(null);
   const [boardMode, setBoardMode] = useState<'grid' | 'isometric'>('grid');
+  const [currentCard, setCurrentCard] = useState<{ title: string; text: string; icon: string; color: string } | null>(null);
+  const [showCard, setShowCard] = useState(false);
   const logRef = useRef<HTMLDivElement>(null);
 
   const current = players[turn];
@@ -91,6 +95,14 @@ export default function PlayMode({ game }: Props) {
       }
       case "event": {
         const text = tile.cardText || JUMANJI_CARDS[Math.floor(Math.random() * JUMANJI_CARDS.length)];
+        const cardTitle = text.split(':')[0] || 'MACERA KARTI';
+        setCurrentCard({
+          title: cardTitle,
+          text: text,
+          icon: tile.icon,
+          color: tile.color
+        });
+        setShowCard(true);
         addLog(`🎴 Macera Kartı: ${text}`);
         const m = text.match(/(\d+)\s*(kare)?\s*(ileri|geri)/i);
         if (m) {
@@ -189,6 +201,8 @@ export default function PlayMode({ game }: Props) {
     setTurn(0);
     setDice(null);
     setWinner(null);
+    setShowCard(false);
+    setCurrentCard(null);
     setLog(["🎲 Yeni macera başladı!"]);
   };
 
@@ -228,7 +242,7 @@ export default function PlayMode({ game }: Props) {
           </div>
           <div className="flex-1">
             {boardMode === 'grid' ? (
-              <GridBoard game={game} players={players} highlight={current?.position} />
+              <GridBoardEnhanced game={game} players={players} highlight={current?.position} />
             ) : (
               <IsometricBoard game={game} players={players} highlight={current?.position} />
             )}
@@ -311,6 +325,13 @@ export default function PlayMode({ game }: Props) {
           </div>
         </div>
       </div>
+
+      {/* Jumanji Card Modal */}
+      <JumanjiCard
+        card={currentCard || undefined}
+        isOpen={showCard}
+        onClose={() => setShowCard(false)}
+      />
     </div>
   );
 }
