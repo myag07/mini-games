@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import type { GameConfig, Player } from "../types";
 import { JUMANJI_CARDS, PLAYER_PRESETS } from "../data/gameLogic";
 import IsometricBoard from "./IsometricBoard";
+import GridBoard from "./GridBoard";
 
 interface Props {
   game: GameConfig;
@@ -29,6 +30,7 @@ export default function PlayMode({ game }: Props) {
   const [busy, setBusy] = useState(false);
   const [log, setLog] = useState<string[]>(["🎲 Macera başladı! İyi şanslar."]);
   const [winner, setWinner] = useState<Player | null>(null);
+  const [boardMode, setBoardMode] = useState<'grid' | 'isometric'>('grid');
   const logRef = useRef<HTMLDivElement>(null);
 
   const current = players[turn];
@@ -201,8 +203,36 @@ export default function PlayMode({ game }: Props) {
         <div className="absolute left-3 top-3 z-10 rounded-lg bg-black/40 px-3 py-1.5 text-xs font-semibold text-emerald-200 backdrop-blur">
           {game.name}
         </div>
-        <div className="aspect-[4/3] w-full">
-          <IsometricBoard game={game} players={players} highlight={current?.position} />
+        <div className="aspect-[4/3] w-full flex flex-col">
+          <div className="flex gap-2 mb-2 justify-end">
+            <button
+              onClick={() => setBoardMode('grid')}
+              className={`px-3 py-1 rounded text-xs font-semibold transition ${
+                boardMode === 'grid'
+                  ? 'bg-emerald-500 text-stone-950'
+                  : 'bg-stone-700 text-stone-200 hover:bg-stone-600'
+              }`}
+            >
+              Grid
+            </button>
+            <button
+              onClick={() => setBoardMode('isometric')}
+              className={`px-3 py-1 rounded text-xs font-semibold transition ${
+                boardMode === 'isometric'
+                  ? 'bg-emerald-500 text-stone-950'
+                  : 'bg-stone-700 text-stone-200 hover:bg-stone-600'
+              }`}
+            >
+              İzometrik
+            </button>
+          </div>
+          <div className="flex-1">
+            {boardMode === 'grid' ? (
+              <GridBoard game={game} players={players} highlight={current?.position} />
+            ) : (
+              <IsometricBoard game={game} players={players} highlight={current?.position} />
+            )}
+          </div>
         </div>
       </div>
 
